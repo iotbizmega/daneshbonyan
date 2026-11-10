@@ -15,7 +15,7 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 9
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +36,7 @@ jobs:
       - name: اجرای یک دور
         env:
           ONCE: "1"
+          MAX_CHANNELS: "120"  # سقف کانال‌های پی‌گیری‌شده در هر دور تا اجرا از وقت workflow بیرون نزند
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BALE_TOKEN: ${{ secrets.BALE_TOKEN }}
