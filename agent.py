@@ -18,6 +18,7 @@ MAX_AGE = int(os.environ.get("MAX_AGE_DAYS", "7")) * 86400
 LLM_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_URL = os.environ.get("LLM_BASE_URL", "").rstrip("/")
 LLM_MODEL = os.environ.get("LLM_MODEL", "")
+ONCE = os.environ.get("ONCE") == "1"  # برای اجرای زمان‌بندی‌شده (GitHub Actions): یک دور و خروج
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
       "Accept-Language": "fa-IR,fa;q=0.9"}
 
@@ -356,15 +357,18 @@ def main():
     if seed:
         log.info("اجرای اول: فقط ثبت موارد موجود، بدون ارسال")
     load_manual()  # تا شمارش کانال‌ها در همین لاگ درست باشد
-    log.info("منابع: %d | کانال‌ها: %d | هر %d ثانیه", len(json.load(open("sources.json", encoding="utf-8"))), n_ch(), INTERVAL)
+    log.info("منابع: %d | کانال‌ها: %d | %s", len(json.load(open("sources.json", encoding="utf-8"))), n_ch(),
+             "یک دور (ONCE)" if ONCE else f"هر {INTERVAL} ثانیه")
     while True:
         try:
             cycle(seed)
-            if seed:
+            if seed and not ONCE:  # در حالت یک‌دوره پیام «فعال شد» فرستادی نمی‌شود تا تکراری نشود
                 send_all("✅ ایجنت فعال شد. از این لحظه موارد جدید ارسال می‌شود.")
-                seed = False
+            seed = False
         except Exception as e:
             log.error("چرخه: %s", e)
+        if ONCE:
+            return
         time.sleep(INTERVAL)
 
 if __name__ == "__main__":
