@@ -19,6 +19,9 @@ LLM_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_URL = os.environ.get("LLM_BASE_URL", "").rstrip("/")
 LLM_MODEL = os.environ.get("LLM_MODEL", "")
 ONCE = os.environ.get("ONCE") == "1"  # برای اجرای زمان‌بندی‌شده (GitHub Actions): یک دور و خروج
+BACKFILL = os.environ.get("BACKFILL") == "1"  # برگشت در تاریخ: گذشته‌ی کانال‌ها را هم می‌فرستد
+PAGES = int(os.environ.get("PAGES", "20" if BACKFILL else "1"))  # چند صفحه به عقب در هر کانال
+FA_DIGITS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
       "Accept-Language": "fa-IR,fa;q=0.9"}
 
@@ -60,14 +63,24 @@ IGNORE = {"joinchat", "join", "share", "addstickers", "addtext", "proxy", "socks
 
 os.makedirs("data", exist_ok=True)
 db = sqlite3.connect("data/seen.db")
-db.execute("CREATE TABLE IF NOT EXISTS seen(id TEXT PRIMARY KEY, ts REAL)")
+db.execute("CREATE TABLE IF NOT EXISTS seen(id TEXT PRIMARY KEY, ts REAL, sent INTEGER DEFAULT 0)")
+try:
+    db.execute("ALTER TABLE seen ADD COLUMN sent INTEGER DEFAULT 0")  # دیتابیس‌های قدیمی ستون ندارند
+except sqlite3.OperationalError:
+    pass
 db.execute("CREATE TABLE IF NOT EXISTS channels(key TEXT PRIMARY KEY, status TEXT)")  # new/ok/no/manual
 
 def is_new(uid):
     return db.execute("SELECT 1 FROM seen WHERE id=?", (uid,)).fetchone() is None
 
 def mark(uid):
-    db.execute("INSERT OR IGNORE INTO seen VALUES(?,?)", (uid, time.time()))
+    db.execute("INSERT OR IGNORE INTO seen VALUES(?,?,0)", (uid, time.time()))
+
+def was_sent(uid, cid):
+    return db.execute("SELECT 1 FROM seen WHERE id IN (?,?) AND sent=1", (uid, cid)).fetchone() is not None
+
+def mark_sent(uid, cid):
+    db.execute("UPDATE seen SET sent=1 WHERE id IN (?,?)", (uid, cid))
 
 def commit():
     db.commit()
@@ -121,12 +134,14 @@ def send_one(base, chat, text):
 
 def send_all(text):
     if not TG:
-        log.info("[-] %s", flat(text)[:260]); return
-    if send_one(f"https://api.telegram.org/bot{TG}", CHAT, text):
+        log.info("[-] %s", flat(text)[:260]); return False
+    ok = send_one(f"https://api.telegram.org/bot{TG}", CHAT, text)
+    if ok:
         time.sleep(0.4)  # رعایت سقف تلگرام (~۲۰ پیام در دقیقه)
     if BALE and BALE_CHAT:
         send_one(f"{BALE_API}/bot{BALE}", BALE_CHAT, text)
         time.sleep(0.4)
+    return ok
 
 # ---------- فیلتر هوشمند اختیاری ----------
 def llm_ok(title, body):
@@ -254,13 +269,24 @@ def page_bale(html, name):
         items.append((txt, f"https://ble.ir/s/{name}/{sid}" if sid else "", day))
     return meta, items
 
-def fetch_channel(key):
+def fetch_channel(key, pages=1):
     plat, name = key.split(":", 1)
     url = PLATFORMS[plat].format(name)
-    r = get(url)
-    discover(r.text)
-    meta, items = page_bale(r.text, name) if plat == "bale" else page_chan(r.text, {"tg": "tgme", "eitaa": "etme"}[plat])
-    items = [(t, urljoin(url, link) if link.startswith("/") else link, ts) for t, link, ts in items]
+    meta, items, before = None, [], None
+    for _ in range(max(1, pages)):
+        u = url if before is None else f"{url}?before={before}"
+        r = get(u)
+        discover(r.text)
+        m, its = page_bale(r.text, name) if plat == "bale" else page_chan(r.text, {"tg": "tgme", "eitaa": "etme"}[plat])
+        meta = meta or m
+        items += [(t, urljoin(u, link) if link.startswith("/") else link, ts) for t, link, ts in its]
+        ids = [int(x) for x in re.findall(r'data-post="[^"/]+/(\d+)"', r.text)]
+        stamps = [ts for _, _, ts in its if ts]
+        if not its or plat == "bale" or not ids:  # بله پیش‌نمایش صفحه‌بندی‌شده ندارد
+            break
+        if stamps and time.time() - min(stamps) > MAX_AGE:  # از بازه‌ی موردنظر قدیمی‌تر شد
+            break
+        before = min(ids)
     return meta, items, url
 
 # ---------- پردازش ----------
@@ -273,7 +299,8 @@ def handle(text, link, ts, source, official, silent):
     cid = "c" + hashlib.md5(re.sub(r"\W+", "", t)[:180].encode()).hexdigest()  # حذف تکراری بین منابع
     known = not is_new(uid) or not is_new(cid)
     mark(uid); mark(cid)
-    if known or silent:
+    # در بازگشتِ تاریخ، فقط آنچه واقعاً ارسال شده تکرار نمی‌شود؛ مواردِ صرفاً ثبت‌شده آزادند
+    if was_sent(uid, cid) or silent or (known and not BACKFILL):
         return 0
     if ts and time.time() - ts > MAX_AGE:
         return 0
@@ -281,8 +308,14 @@ def handle(text, link, ts, source, official, silent):
         return 0
     if not llm_ok(text[:160], text):
         return 0
-    send_all(f"🔔 {text[:900]}\n\n📌 {source}" + (f"\n{link}" if link else ""))
-    return 1
+    age = ""
+    if BACKFILL and ts:
+        d = int((time.time() - ts) // 86400)
+        age = f"\n🗓 {time.strftime('%Y/%m/%d', time.gmtime(ts))} ({str(d).translate(FA_DIGITS)} روز پیش)"
+    if send_all(f"🔔 {text[:900]}\n\n📌 {source}" + (f"\n{link}" if link else "") + age):
+        mark_sent(uid, cid)
+        return 1
+    return 0
 
 def run_source(s, seed):
     fn = fetch_rss if s["type"] == "rss" else (lambda u: fetch_html(u, s.get("selector")))
@@ -294,8 +327,8 @@ def run_source(s, seed):
     return n
 
 def run_channel(key, status, seed):
-    silent = seed or status == "new"  # اولین بررسی هر کانال: فقط ثبت، بدون ارسال
-    meta, items, url = fetch_channel(key)
+    silent = (seed or status == "new") and not BACKFILL  # اولین بررسی هر کانال: فقط ثبت، بدون ارسال
+    meta, items, url = fetch_channel(key, PAGES)
     any_k1 = bool(K1.search(norm(meta))) or any(K1.search(norm(t)) for t, _, _ in items)
     title = flat(meta.split("@")[0].replace("✔", ""))[:60]  # نام کانال برای نمایش در پیام
     n = 0
@@ -353,12 +386,13 @@ def cycle(seed):
     commit()
 
 def main():
-    seed = db.execute("SELECT COUNT(*) FROM seen").fetchone()[0] == 0
+    seed = db.execute("SELECT COUNT(*) FROM seen").fetchone()[0] == 0 and not BACKFILL
     if seed:
         log.info("اجرای اول: فقط ثبت موارد موجود، بدون ارسال")
     load_manual()  # تا شمارش کانال‌ها در همین لاگ درست باشد
-    log.info("منابع: %d | کانال‌ها: %d | %s", len(json.load(open("sources.json", encoding="utf-8"))), n_ch(),
-             "یک دور (ONCE)" if ONCE else f"هر {INTERVAL} ثانیه")
+    mode = (f"بازگشت در تاریخ: {PAGES} صفحه، {MAX_AGE // 86400} روز" if BACKFILL
+            else "یک دور (ONCE)" if ONCE else f"هر {INTERVAL} ثانیه")
+    log.info("منابع: %d | کانال‌ها: %d | %s", len(json.load(open("sources.json", encoding="utf-8"))), n_ch(), mode)
     while True:
         try:
             cycle(seed)

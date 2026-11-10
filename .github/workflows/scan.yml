@@ -45,6 +45,7 @@ jobs:
       - name: ذخیره‌ی وضعیت
         run: |
           set -e
+          date -u '+%Y-%m-%dT%H:%M:%SZ' > /tmp/heartbeat
           cp data/seen.db /tmp/seen.db
           git config user.name "danesh-agent"
           git config user.email "danesh-agent@users.noreply.github.com"
@@ -55,6 +56,7 @@ jobs:
           fi
           mkdir -p data
           cp /tmp/seen.db data/seen.db
-          git add -f data/seen.db
+          cp /tmp/heartbeat data/heartbeat
+          git add -f data/seen.db data/heartbeat
           git diff --cached --quiet || git commit -q -m "وضعیت موارد دیده‌شده"
           git push -q origin state
