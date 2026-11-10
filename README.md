@@ -13,8 +13,11 @@
 - `TELEGRAM_TOKEN` — توکن ربات
 - `CHAT_ID` — شناسه‌ی چت/کانال (برای کانال با `-` شروع می‌شود)
 
-اختیاری: `BALE_TOKEN`، `BALE_CHAT_ID`.
+اختیاری: `BALE_TOKEN`، `BALE_CHAT_ID`. اگر Settings → Actions → General در گزینه‌ی «Read repository contents and packages permissions» باشد و push شاخه‌ی `state` رد شود، یک توکن با دسترسی Contents:write به صورت secret با نام `STATE_TOKEN` بسازید؛ workflow خودش را با آن ذخیره می‌کند.
 دو نکته: در پلن رایگان، مخزن **public** دقیقه‌ی نامحدود دارد ولی مخزن private سقف ۲۰۰۰ دقیقه در ماه دارد (با دورهای ۱۰ دقیقه‌ای از آن رد می‌شوید؛ در این حالت cron را روی `0 * * * *` بگذارید). همچنین زمان‌بندی GitHub ممکن است در ساعات شلوغ چند دقیقه عقب بیفتد.
+برای اطمینان از اینکه زمان‌بندی واقعاً کار می‌کند، شاخه‌ی `state` را نگاه کنید: هر دور اجرا فایل `data/heartbeat` را با ساعت UTC به‌روز می‌کند.
+
+    git fetch origin state && git show origin/state:data/heartbeat
 
 ### ۲) با سرور خودتان: Docker
     git clone <repo> && cd <repo>

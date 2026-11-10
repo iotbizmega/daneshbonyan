@@ -29,8 +29,8 @@ jobs:
         run: |
           mkdir -p data
           if git ls-remote --exit-code --heads origin state >/dev/null 2>&1; then
-            git fetch --depth 1 origin state
-            git show FETCH_HEAD:data/seen.db > data/seen.db || rm -f data/seen.db
+            git fetch -q --depth 1 origin +refs/heads/state:refs/remotes/origin/state
+            git show refs/remotes/origin/state:data/seen.db > data/seen.db || rm -f data/seen.db
           fi
 
       - name: اجرای یک دور
@@ -43,20 +43,25 @@ jobs:
         run: python -u agent.py
 
       - name: ذخیره‌ی وضعیت
+        if: always()  # حتی وقتی اجرای دور شکست بخورد ضربان ثبت شود تا وضعیتِ زمان‌بندی قابل پیگیری باشد
+        env:
+          GIT_TOKEN: ${{ secrets.STATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -e
           date -u '+%Y-%m-%dT%H:%M:%SZ' > /tmp/heartbeat
-          cp data/seen.db /tmp/seen.db
-          git config user.name "danesh-agent"
-          git config user.email "danesh-agent@users.noreply.github.com"
-          if git ls-remote --exit-code --heads origin state >/dev/null 2>&1; then
-            git checkout -B state origin/state
+          if [ -f data/seen.db ]; then cp data/seen.db /tmp/seen.db; fi
+          git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin +refs/heads/state:refs/remotes/origin/state || true
+          if git rev-parse --verify -q refs/remotes/origin/state >/dev/null; then
+            git checkout -q -B state refs/remotes/origin/state
           else
-            git checkout --orphan state
+            git checkout -q --orphan state
           fi
           mkdir -p data
-          cp /tmp/seen.db data/seen.db
+          if [ -f /tmp/seen.db ]; then cp /tmp/seen.db data/seen.db; fi
           cp /tmp/heartbeat data/heartbeat
+          git config user.name "danesh-agent"
+          git config user.email "danesh-agent@users.noreply.github.com"
           git add -f data/seen.db data/heartbeat
           git diff --cached --quiet || git commit -q -m "وضعیت موارد دیده‌شده"
-          git push -q origin state
+          git push -q origin HEAD:state
