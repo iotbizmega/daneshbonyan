@@ -21,6 +21,7 @@ LLM_MODEL = os.environ.get("LLM_MODEL", "")
 ONCE = os.environ.get("ONCE") == "1"  # برای اجرای زمان‌بندی‌شده (GitHub Actions): یک دور و خروج
 BACKFILL = os.environ.get("BACKFILL") == "1"  # برگشت در تاریخ: گذشته‌ی کانال‌ها را هم می‌فرستد
 PAGES = int(os.environ.get("PAGES", "20" if BACKFILL else "1"))  # چند صفحه به عقب در هر کانال
+BACKFILL_MAX = int(os.environ.get("BACKFILL_MAX", "120"))  # سقف پیام‌های یک‌باره در بازگشت تاریخ
 FA_DIGITS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
       "Accept-Language": "fa-IR,fa;q=0.9"}
@@ -36,6 +37,11 @@ TR = str.maketrans({"‌": " ", "ي": "ی", "ك": "ک", "ة": "ه", "ـ": "", "�
 K1 = re.compile(r"دانش ?بنیان|شرکت ?های ?دانش|اینیشیو|شتاب ?دهنده")
 K2 = re.compile(r"تسهیلات|وام|فراخوان|اعتبار|حمایت|گرنت|سرمایه ?گذاری|جذب ?منابع|مشارکت ?مالی|ضمانتنامه|"
                 r"کمک ?مالی|معافیت|سود ?برگ|تأمین ?مالی|ثبت ?نام|پیش ?نهاد|دور ?تحقیقات")
+# در بازگشت تاریخ: فقط «اعلامِ فراخوان»ها؛ اعلامیه‌ی مراسم، دوره‌ی آموزشی و پرسش‌های متداول رد می‌شوند
+CALL = re.compile(r"فراخوان|مهلت|ثبت ?نام|آخرین ?تاریخ")
+NOISE = re.compile(r"آموزش|کارگاه|دوره|وب ?نار|بوت ?کمپ|پسا ?دکتری|تفاهم ?نامه|نشست|جلسه|دیدار|بازدید|مراسم|آیین|افتتاح|امضا|"
+                   r"بزرگداشت|تقدیر|المپی?اد|خبر ?روز|گزارش|میز خدمت|جایزه|رویداد|نمایشگاه|پاویون|تبریک|"
+                   r"آیا|چگونه|چیست|به چه صورت|دستاورد|سرفصل|برگزار می ?(شود|کند)")
 BAD = re.compile(r"آگهی ?استخدام|جذب ?نیرو|فروش ?ویژه|تخفیف ?ویژه|کلاه ?بردار|قرعه ?کشی|مسابقه|جشنواره ?فيلم|"
                  r"وبینار|وب ?نار|کارگاه ?آموزشی|دوره ?آموزشی|بوت ?کمپ|اردو|ثبت ?نام ?آزادسازی|"
                  r"ازدواج|سفارش ?عروسی|زنگ ?تدریس|مدرسه ?تابستانه| IELTS|آیلتس|تول ?روز")
@@ -136,8 +142,7 @@ def send_all(text):
     if not TG:
         log.info("[-] %s", flat(text)[:260]); return False
     ok = send_one(f"https://api.telegram.org/bot{TG}", CHAT, text)
-    if ok:
-        time.sleep(0.4)  # رعایت سقف تلگرام (~۲۰ پیام در دقیقه)
+    time.sleep(3.2 if BACKFILL else 0.4)  # بازگشت تاریخ صدها پیام پشت هم می‌فرستد؛ سقف تلگرام (~۲۰ پیام در دقیقه) رعایت شود
     if BALE and BALE_CHAT:
         send_one(f"{BALE_API}/bot{BALE}", BALE_CHAT, text)
         time.sleep(0.4)
@@ -290,23 +295,34 @@ def fetch_channel(key, pages=1):
     return meta, items, url
 
 # ---------- پردازش ----------
+def fingerprints(text, link):
+    """اثر انگشت یک مورد: یکی بر پایه‌ی لینک، یکی بر پایه‌ی خود متن تا تکرار بین منابع هم گرفته شود."""
+    t = norm(text)
+    uid = hashlib.md5((link + text[:120]).encode()).hexdigest()
+    cid = "c" + hashlib.md5(re.sub(r"\W+", "", t)[:180].encode()).hexdigest()
+    return uid, cid, t
+
+def passes(t, ts, official):
+    if ts and time.time() - ts > MAX_AGE:
+        return False
+    if BAD.search(t) or not (K1.search(t) or official):
+        return False
+    if not BACKFILL:
+        return bool(K2.search(t))
+    # در بازگشت تاریخ: اعلامِ دارای مهلت، با تاریخِ مشخص و سرصفحه‌ی غیرمراسمی
+    return bool(ts) and bool(CALL.search(t)) and not NOISE.search(t[:160])
+
 def handle(text, link, ts, source, official, silent):
     text = flat(text)
     if not text:
         return 0
-    t = norm(text)  # برای تطبیق کلیدواژه‌ها و اثر انگشت
-    uid = hashlib.md5((link + text[:120]).encode()).hexdigest()
-    cid = "c" + hashlib.md5(re.sub(r"\W+", "", t)[:180].encode()).hexdigest()  # حذف تکراری بین منابع
+    uid, cid, t = fingerprints(text, link)
     known = not is_new(uid) or not is_new(cid)
     mark(uid); mark(cid)
     # در بازگشتِ تاریخ، فقط آنچه واقعاً ارسال شده تکرار نمی‌شود؛ مواردِ صرفاً ثبت‌شده آزادند
     if was_sent(uid, cid) or silent or (known and not BACKFILL):
         return 0
-    if ts and time.time() - ts > MAX_AGE:
-        return 0
-    if not K2.search(t) or BAD.search(t) or not (K1.search(t) or official):
-        return 0
-    if not llm_ok(text[:160], text):
+    if not passes(t, ts, official) or not llm_ok(text[:160], text):
         return 0
     age = ""
     if BACKFILL and ts:
@@ -316,6 +332,61 @@ def handle(text, link, ts, source, official, silent):
         mark_sent(uid, cid)
         return 1
     return 0
+
+def add(out, text, link, ts, source, official):
+    """عضوِ فهرست collect می‌شود؛ آنچه قبلاً ارسال شده یا فیلتر رد می‌کند، و تکرارِ درون‌فهرستی اضافه نمی‌شود."""
+    text = flat(text)
+    if not text:
+        return
+    uid, cid, t = fingerprints(text, link)
+    if was_sent(uid, cid) or not passes(t, ts, official):
+        return
+    for o in out:
+        if o[1] == uid or o[2] == cid:
+            return
+    out.append((ts or 0, uid, cid, text, link, source, official))
+
+def collect():
+    """همه‌ی واجدان‌شرایطِ بازه را از منابع و کانال‌ها جمع می‌کند، بدون هیچ ارسالی."""
+    out = []
+    try:
+        sources = [s for s in json.load(open("sources.json", encoding="utf-8")) if not s.get("disabled")]
+    except Exception as e:
+        log.error("sources.json خوانده نشد: %s", e); sources = []
+    for s in sources:
+        fn = fetch_rss if s["type"] == "rss" else (lambda u: fetch_html(u, s.get("selector")))
+        try:
+            for text, link, ts in fn(s["url"]):
+                add(out, text, link, ts, s["name"], s.get("official", False))
+        except Exception as e:
+            log.warning("%s خطا: %s", s.get("name"), str(e)[:160])
+    load_manual()
+    keys = db.execute("SELECT key FROM channels WHERE status!='no'").fetchall()
+    for i, (key,) in enumerate(keys, 1):
+        try:
+            meta, items, url = fetch_channel(key, PAGES)
+            title = flat((meta or "").split("@")[0].replace("✔", ""))[:60]
+            for text, link, ts in items:
+                add(out, text, link or url, ts, f"{key} · {title}", False)
+            log.info("کانال %d/%d %s: %d واجد شرایط تا اینجا", i, len(keys), key, len(out))
+        except Exception as e:
+            log.warning("%s خطا: %s", key, str(e)[:160])
+    commit()  # کانال‌های کشف‌شده و تغییر وضعیت‌ها ثبت شوند
+    return out
+
+def backfill(limit):
+    """یک‌باره در تاریخ برمی‌گردد: تازه‌ترین‌ها اول، تا سقف limit پیام."""
+    items = sorted(collect(), key=lambda o: o[0], reverse=True)
+    if not items:
+        log.info("بازگشت در تاریخ: مورد واجد شرایطی پیدا نشد"); return 0
+    log.info("بازگشت در تاریخ: %d مورد واجد شرایط | %d تای تازه‌تر ارسال می‌شود | بازه %d روز",
+             len(items), min(limit, len(items)), MAX_AGE // 86400)
+    n = 0
+    for ts, _, _, text, link, source, official in items[:limit]:
+        n += handle(text, link, ts or None, source, official, False)
+    commit()
+    log.info("بازگشت در تاریخ پایان یافت: %d مورد ارسال شد", n)
+    return n
 
 def run_source(s, seed):
     fn = fetch_rss if s["type"] == "rss" else (lambda u: fetch_html(u, s.get("selector")))
@@ -386,13 +457,15 @@ def cycle(seed):
     commit()
 
 def main():
-    seed = db.execute("SELECT COUNT(*) FROM seen").fetchone()[0] == 0 and not BACKFILL
+    if BACKFILL:
+        backfill(BACKFILL_MAX)
+        return
+    seed = db.execute("SELECT COUNT(*) FROM seen").fetchone()[0] == 0
     if seed:
         log.info("اجرای اول: فقط ثبت موارد موجود، بدون ارسال")
     load_manual()  # تا شمارش کانال‌ها در همین لاگ درست باشد
-    mode = (f"بازگشت در تاریخ: {PAGES} صفحه، {MAX_AGE // 86400} روز" if BACKFILL
-            else "یک دور (ONCE)" if ONCE else f"هر {INTERVAL} ثانیه")
-    log.info("منابع: %d | کانال‌ها: %d | %s", len(json.load(open("sources.json", encoding="utf-8"))), n_ch(), mode)
+    log.info("منابع: %d | کانال‌ها: %d | هر %d ثانیه",
+             len(json.load(open("sources.json", encoding="utf-8"))), n_ch(), INTERVAL)
     while True:
         try:
             cycle(seed)
