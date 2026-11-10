@@ -1,0 +1,117 @@
+[
+  {
+    "name": "Bing News: تسهیلات دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=تسهیلات+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: فراخوان دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=فراخوان+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: حمایت مالی دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=حمایت+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: صندوق نوآوری و شکوفایی",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=صندوق+نوآوری+و+شکوفایی"
+  },
+  {
+    "name": "Bing News: اعتبار ویژه دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اعتبار+ویژه+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: وام دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=وام+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: شتاب دهنده فراخوان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=شتاب+دهنده+فراخوان"
+  },
+  {
+    "name": "Bing News: پارک علم و فناوری فراخوان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=پارک+علم+و+فناوری+فراخوان"
+  },
+  {
+    "name": "خبرگزاری ایرنا",
+    "type": "rss",
+    "url": "https://www.irna.ir/rss"
+  },
+  {
+    "name": "خبرگزاری مهر",
+    "type": "rss",
+    "url": "https://www.mehrnews.com/rss"
+  },
+  {
+    "name": "خبرگزاری کار ایران (ایلنا)",
+    "type": "rss",
+    "url": "https://www.ilna.ir/rss"
+  },
+  {
+    "name": "بنیاد ملی علم ایران: حمایت‌های ویژه فراخوانی",
+    "type": "html",
+    "official": true,
+    "url": "https://insf.org/fa/news/category/21/"
+  },
+  {
+    "name": "بنیاد ملی علم ایران: اخبار",
+    "type": "html",
+    "official": true,
+    "url": "https://insf.org/fa/news"
+  },
+  {
+    "name": "سازمان پژوهش‌های علمی و صنعتی ایران: اطلاعیه‌ها",
+    "type": "html",
+    "official": true,
+    "url": "https://irost.org/اطلاعیه-ها"
+  },
+  {
+    "name": "سازمان پژوهش‌های علمی و صنعتی ایران: اخبار",
+    "type": "html",
+    "official": true,
+    "url": "https://irost.org/اخبار"
+  },
+  {
+    "name": "ستاد توسعه فناوری نانو: اخبار",
+    "type": "rss",
+    "official": true,
+    "url": "https://news.nano.ir/rss"
+  },
+  {
+    "name": "پارک علم و فناوری دانشگاه تهران: اخبار",
+    "type": "html",
+    "official": true,
+    "selector": ".entry-title",
+    "url": "https://utstpark.ir/news/"
+  },
+
+  {
+    "name": "صندوق نوآوری و شکوفایی: فراخوان‌ها",
+    "type": "html",
+    "official": true,
+    "disabled": true,
+    "url": "https://www.inif.ir/web/guest/notifications"
+  },
+  {
+    "name": "صندوق نوآوری و شکوفایی: اخبار",
+    "type": "html",
+    "official": true,
+    "disabled": true,
+    "url": "https://www.inif.ir/web/guest/fund-news"
+  },
+  {
+    "name": "معاونت علمی، فناوری و اقتصاد دانش‌بنیان: اخبار",
+    "type": "html",
+    "official": true,
+    "disabled": true,
+    "url": "https://www.isti.ir/Nnews"
+  }
+]
+

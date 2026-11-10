@@ -1,0 +1,11 @@
+services:
+  agent:
+    build: .
+    env_file: .env
+    environment:
+      TZ: Asia/Tehran
+    volumes:
+      - ./data:/app/data
+      - ./sources.json:/app/sources.json:ro
+      - ./channels.txt:/app/channels.txt:ro
+    restart: unless-stopped
