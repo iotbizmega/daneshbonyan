@@ -1,0 +1,60 @@
+name: اسکن
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install --no-cache-dir -r requirements.txt
+
+      - name: بازیابی وضعیت دور قبل
+        run: |
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin state >/dev/null 2>&1; then
+            git fetch --depth 1 origin state
+            git show FETCH_HEAD:data/seen.db > data/seen.db || rm -f data/seen.db
+          fi
+
+      - name: اجرای یک دور
+        env:
+          ONCE: "1"
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          BALE_TOKEN: ${{ secrets.BALE_TOKEN }}
+          BALE_CHAT_ID: ${{ secrets.BALE_CHAT_ID }}
+        run: python -u agent.py
+
+      - name: ذخیره‌ی وضعیت
+        run: |
+          set -e
+          cp data/seen.db /tmp/seen.db
+          git config user.name "danesh-agent"
+          git config user.email "danesh-agent@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin state >/dev/null 2>&1; then
+            git checkout -B state origin/state
+          else
+            git checkout --orphan state
+          fi
+          mkdir -p data
+          cp /tmp/seen.db data/seen.db
+          git add -f data/seen.db
+          git diff --cached --quiet || git commit -q -m "وضعیت موارد دیده‌شده"
+          git push -q origin state
