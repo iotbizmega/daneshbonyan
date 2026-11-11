@@ -62,91 +62,75 @@
   {
     "name": "بنیاد ملی علم ایران: حمایت‌های ویژه فراخوانی",
     "type": "html",
-    "official": true,
     "url": "https://insf.org/fa/news/category/21/"
   },
   {
     "name": "بنیاد ملی علم ایران: اخبار",
     "type": "html",
-    "official": true,
     "url": "https://insf.org/fa/news"
   },
   {
     "name": "سازمان پژوهش‌های علمی و صنعتی ایران: اطلاعیه‌ها",
     "type": "html",
-    "official": true,
     "url": "https://irost.org/اطلاعیه-ها"
   },
   {
     "name": "سازمان پژوهش‌های علمی و صنعتی ایران: اخبار",
     "type": "html",
-    "official": true,
     "url": "https://irost.org/اخبار"
   },
   {
     "name": "ستاد توسعه فناوری نانو: اخبار",
     "type": "rss",
-    "official": true,
     "url": "https://news.nano.ir/rss"
   },
   {
     "name": "پارک علم و فناوری دانشگاه تهران: اخبار",
     "type": "html",
-    "official": true,
     "selector": "a.av-masonry-entry",
     "url": "https://utstpark.ir/news/"
   },
   {
     "name": "پارک علم و فناوری خراسان رضوی: اطلاعیه‌ها و فراخوان‌ها",
     "type": "html",
-    "official": true,
     "url": "https://www.kstp.ir/fa/news?category=181"
   },
   {
     "name": "پارک علم و فناوری آذربایجان غربی: اطلاعیه‌ها",
     "type": "html",
-    "official": true,
     "url": "https://wastp.ir/announcements/"
   },
   {
     "name": "پارک علم و فناوری لرستان: اخبار و فراخوان‌ها",
     "type": "html",
-    "official": true,
     "url": "https://lstp.ir/"
   },
   {
     "name": "پارک علم و فناوری اردبیل: فراخوان‌ها",
     "type": "html",
-    "official": true,
     "url": "https://ardstp.ir/news/category/فراخوان-1"
   },
   {
     "name": "پارک علم و فناوری زنجان: فراخوان‌ها",
     "type": "html",
-    "official": true,
     "url": "https://www.zstp.ir/calls/"
   },
-
   {
     "name": "صندوق نوآوری و شکوفایی: فراخوان‌ها",
     "type": "html",
-    "official": true,
     "disabled": true,
     "url": "https://www.inif.ir/web/guest/notifications"
   },
   {
     "name": "صندوق نوآوری و شکوفایی: اخبار",
     "type": "html",
-    "official": true,
     "disabled": true,
     "url": "https://www.inif.ir/web/guest/fund-news"
   },
   {
     "name": "معاونت علمی، فناوری و اقتصاد دانش‌بنیان: اخبار",
     "type": "html",
-    "official": true,
     "disabled": true,
     "url": "https://www.isti.ir/Nnews"
   }
 ]
-

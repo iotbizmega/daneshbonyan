@@ -35,16 +35,44 @@ TR = str.maketrans({"‌": " ", "ي": "ی", "ك": "ک", "ة": "ه", "ـ": "", "�
                     "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4", "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
                     "0": "0", "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9"})
 K1 = re.compile(r"دانش ?بنیان|شرکت ?های ?دانش|اینیشیو|شتاب ?دهنده")
-K2 = re.compile(r"تسهیلات|وام|فراخوان|اعتبار|حمایت|گرنت|سرمایه ?گذاری|جذب ?منابع|مشارکت ?مالی|ضمانتنامه|"
-                r"کمک ?مالی|معافیت|سود ?برگ|تأمین ?مالی|ثبت ?نام|پیش ?نهاد|دور ?تحقیقات")
-# در بازگشت تاریخ: فقط «اعلامِ فراخوان»ها؛ اعلامیه‌ی مراسم، دوره‌ی آموزشی و پرسش‌های متداول رد می‌شوند
-CALL = re.compile(r"فراخوان|مهلت|ثبت ?نام|آخرین ?تاریخ")
-NOISE = re.compile(r"آموزش|کارگاه|دوره|وب ?نار|بوت ?کمپ|پسا ?دکتری|تفاهم ?نامه|نشست|جلسه|دیدار|بازدید|مراسم|آیین|افتتاح|امضا|"
-                   r"بزرگداشت|تقدیر|المپی?اد|خبر ?روز|گزارش|میز خدمت|جایزه|رویداد|نمایشگاه|پاویون|تبریک|"
-                   r"آیا|چگونه|چیست|به چه صورت|دستاورد|سرفصل|برگزار می ?(شود|کند)")
-BAD = re.compile(r"آگهی ?استخدام|جذب ?نیرو|فروش ?ویژه|تخفیف ?ویژه|کلاه ?بردار|قرعه ?کشی|مسابقه|جشنواره ?فيلم|"
-                 r"وبینار|وب ?نار|کارگاه ?آموزشی|دوره ?آموزشی|بوت ?کمپ|اردو|ثبت ?نام ?آزادسازی|"
-                 r"ازدواج|سفارش ?عروسی|زنگ ?تدریس|مدرسه ?تابستانه| IELTS|آیلتس|تول ?روز")
+# فقط «پولِ قابل درخواست»: وام و تسهیلات و اعتبار و ضمانت‌نامه و گرنت. واژه‌ی «فراخوان» به‌تنهایی کافی نیست،
+# چون فراخوانِ مسابقه، نمایشگاه، ثبت‌نام و رویداد هم همین کلمه را دارد. نامِ نهادها (صندوق نوآوری و…) هم
+# به‌تنهایی سیگنال پول نیست؛ بسیاری از خبرهای ادبی‌آزاد و جلسه‌ها فقط نامِ صندوق را دارند.
+FAC = re.compile(r"تسهیلات|\bوام\b|خط ?اعتباری|\bاعتبار(?! ?سنجی| ?بخش)|ضمانت ?نامه|تأمین ?مالی|"
+                 r"سرمایه ?گذاری|جذب ?(منابع|سرمایه)|مشارکت ?مالی|حمایت ?(مالی|ویژه|های ویژه)|کمک ?هزینه|"
+                 r"کمک ?(مالی|بلا ?عوض)|مشوق|بودجه|گرنت|پژوهش ?انه|معافیت ?(مالیاتی|گمرکی)|قرض ?الحسنه|"
+                 r"بسته ?حمایتی|سود ?برگ|تخفیف ?بدهی|بازپرداخت|صندوق ?ضمانت")
+# علاوه بر پول، متن باید «اقدام‌پذیر» باشد: فراخوان، مهلت، ثبت‌نام، ارسال مستندات و…
+# این شرط خبرهای محض (۱۵۰ همت حمایت شد، ۳۳ همت پرداخت شد و…) را بیرون می‌اندازد.
+CALL = re.compile(r"فراخوان|مهلت|ثبت ?نام|پذیرش|اطلاع ?یه|اطلاع ?رسانی|ارسال ?(مستندات|طرح|پیشنهاد|اثر)|"
+                  r"دریافت ?(مستندات|طرح|پیشنهاد)|تا ?تاریخ|آخرین ?تاریخ|حداکثر ?(مبلغ|تومان)|"
+                  r"شرایط ?(شرکت|بهره|اعضا|دریافت|ارسال)|سامانه|دعوت ?به ?همکاری|جستجوی ?(تیم|استارتاپ|محصول)")
+# حوزه‌ی کار ما: اینترنت اشیا، هوشمندسازی و فناورهای نزدیک به آن
+IOT = re.compile(r"اینترنت ?اشیا|\biot\b|هوشمند|هوش ?مصنوعی|یادگیری (ماشین|عمیق)|خودکارسازی|اتوماسیون|"
+                 r"حسگر|سنسور|شبکه ?حسگر|پایش (وضعیت|مصرف|از ?راه ?دور|هوشمند)|کلان ?داده|داده ?محور|"
+                 r"رایانش (ابر|لبه|موبایل)|ربات|پهپاد|الکترونیک|\bمدار\b|تراشه|میکرو ?کنترلر|نهفته|"
+                 r"مخابرات|نسل ?(چهارم|پنجم)|5g|6g|lorawan|nbiot|rfid|bluetooth|بلوتوث|zigbee|شبکه ?باز|"
+                 r"صنعت ?۴|industry ?4|تحول ?دیجیتال|اقتصاد ?دیجیتال|دیجیتال|کنتور|بینایی ?ماشین|"
+                 r"واقعیت (افزوده|مجازی)|دوقلوی ?دیجیتال|سایبری|cyber|smart")
+# پزشکی و سلامت حوزه‌ی ما نیست، حتی اگر دانش‌بنیان و دارای تسهیلات باشد
+MED = re.compile(r"پزشک|پزشکی|سلامت|بیمارستان|بیمار|درمان|دارو|بهداشت|پرستار|بالینی|جراحی|رادیولوژی|"
+                 r"دندان|کلینیک|درمانگاه|داروخانه|تجهیزات ?پزشکی|زیست ?پزشکی|همودیالیز|ویتامین|نوزاد|"
+                 r"جنین|لقاح|شیر ?مادر|مراقبت ?سلامت|بیمه ?سلامت|پیراپزشکی|غذا ?سالم")
+# اگر اشاره‌ی صریحی به اینترنت اشیا/هوشمندسازی نشود، فراخوانِ دانش‌بنیانِ حوزه‌های دیگر هم رد می‌شود
+FIELD = re.compile(r"کشاورز|کشاورزی|\bدام\b|طیور|\bماهی\b|شیلات|زنبور|عسل|گل ?خانه|باغداری|فرش|صنایع ?دستی|"
+                   r"نساجی|چرم|کفش|پوشاک|مسکن|شهرسازی|عمران|راه ?سازی|پتروشیمی|پالایشگاه|فولاد|سیمان|"
+                   r"معدن|سرامیک|غذا|رستوران|گردشگری|هتل|آژانس|حمل ?ونقل ?عمومی|هنر|سینما|موسیقی|"
+                   r"ادبی|کتاب|فرهنگی|تربیتی|ورزشی|قرآن|امر ?به ?معروف|"
+                   r"پسماند|بازیافت|تجدید ?پذیر|خورشیدی|نیروگاه|صنایع ?شیمیایی")
+# رویداد، مسابقه، آموزش، مراسم، مصاحبه و خبرِ محض هرگز ارسال نمی‌شوند.
+# «دوره» و «آیین» تنها وقتی رد می‌کنند که آموزشی/مراسمی باشند: «دوره بازپرداخت» و «آیین‌نامه» نباید رد شوند.
+BAD = re.compile(r"آگهی ?استخدام|جذب ?نیرو|فروش ?ویژه|تخفیف ?ویژه|کلاه ?بردار|قرعه ?کشی|مسابقه|جشنواره|"
+                 r"فيلم|فیلم|وبینار|وب ?نار|کارگاه|دوره(?! ?بازپرداخت)|بوت ?کمپ|آموزش|پسا ?دکتری|چالش|رقابت|"
+                 r"المپی?اد|ماراتن|اردو|کلاس|ثانویه|زنگ ?تدریس|ثبت ?نام ?آزادسازی|ازدواج|سفارش ?عروسی|تول ?روز|"
+                 r"IELTS|آیلتس|واحد ?نما|معرفی ?محصول|نمایشگاه|پاویون|رویداد|مراسم|\bآیین\b(?! ?نامه)|امضا|تفاهم ?نامه|"
+                 r"نشست|جلسه|جلسات|دیدار|بازدید|افتتاح|بزرگداشت|تقدیر|تبریک|جایزه|خبر ?روز|گزارش|میز ?خدمت|"
+                 r"آیا|چگونه|چیست|به ?چه ?صورت|دستاورد|سرفصل|قسمت|"
+                 r"مصاحبه|گفت ?وگو|پادکست|برنامه ?زنده|تلویزیون|در ?آینه ?رسانه|شبکه ?نمایان")
 
 def flat(t):
     """یکسان‌سازی فاصله‌ها برای نمایش؛ متن فارسی دست‌نخورده می‌ماند (نیم‌فاصله حفظ می‌شود)."""
@@ -75,6 +103,7 @@ try:
 except sqlite3.OperationalError:
     pass
 db.execute("CREATE TABLE IF NOT EXISTS channels(key TEXT PRIMARY KEY, status TEXT)")  # new/ok/no/manual
+db.execute("CREATE TABLE IF NOT EXISTS dup(uid TEXT PRIMARY KEY, ts REAL, words TEXT)")  # امضای واژگانیِ مواردِ ارسالی
 
 def is_new(uid):
     return db.execute("SELECT 1 FROM seen WHERE id=?", (uid,)).fetchone() is None
@@ -87,6 +116,27 @@ def was_sent(uid, cid):
 
 def mark_sent(uid, cid):
     db.execute("UPDATE seen SET sent=1 WHERE id IN (?,?)", (uid, cid))
+
+def keywords(t):
+    """واژه‌های بلندِ متن؛ امضای محتوا برای گرفتنِ بازنشرِ یک فراخوان با مقدمه‌ی متفاوت."""
+    return set(re.findall(r"[\u0621-\u064aA-Za-z]{5,}", t))
+
+def near_dup(ws, uid=None):
+    """اثر انگشتِ متنی به حرف‌های اول حساس است؛ «باسلام …» و «… » دو شناسه‌ی متفاوت می‌سازند.
+    در تستِ ۹۲ روزه، بازنشرهای واقعی همپوشانی واژگانی ≥۰٫۹۱ داشتند و دو فراخوانِ متمایز ≤۰٫۷۴."""
+    if len(ws) < 8:
+        return False
+    for u2, w2 in db.execute("SELECT uid, words FROM dup WHERE ts>?", (time.time() - 45 * 86400,)):
+        if u2 == uid:
+            continue  # در بازگشتِ تاریخ، خودِ مورد هم در جدول ثبت شده است
+        o = set(w2.split(","))
+        if len(ws & o) >= 0.85 * len(ws | o):
+            return True
+    return False
+
+def note_dup(uid, ws):
+    if len(ws) >= 8:
+        db.execute("INSERT OR REPLACE INTO dup VALUES(?,?,?)", (uid, time.time(), ",".join(sorted(ws))))
 
 def commit():
     db.commit()
@@ -153,8 +203,10 @@ def llm_ok(title, body):
     if not (LLM_KEY and LLM_URL and LLM_MODEL):
         return True
     prompt = (f"متن: {title}\n{body[:700]}\n\n"
-              "آیا این یک تسهیلات/وام/فراخوان/حمایت مالی قابل درخواست برای شرکت‌های دانش‌بنیان است "
-              "(نه صرفاً خبر، تحلیل، تبلیغ یا گزارش)؟ فقط YES یا NO.")
+              "آیا این مورد یک تسهیلات/وام/خط اعتباری/ضمانت‌نامه/حمایت مالیِ قابل درخواست برای شرکت‌های "
+              "دانش‌بنیانِ حوزه‌ی اینترنت اشیا و هوشمندسازی است؟ "
+              "مسابقه، جشنواره، رویداد، نمایشگاه، کارگاه، دوره‌ی آموزشی، مراسم، نشست خبری و هر متن پزشکی/سلامت = NO. "
+              "فقط YES یا NO.")
     try:
         r = post(f"{LLM_URL}/chat/completions", headers={"Authorization": f"Bearer {LLM_KEY}"},
                  json={"model": LLM_MODEL, "temperature": 0, "max_tokens": 16,
@@ -302,17 +354,19 @@ def fingerprints(text, link):
     cid = "c" + hashlib.md5(re.sub(r"\W+", "", t)[:180].encode()).hexdigest()
     return uid, cid, t
 
-def passes(t, ts, official):
+def passes(t, ts):
+    """تسهیلاتِ مالیِ اقدام‌پذیر در حوزه‌ی اینترنت اشیا و هوشمندسازی؛ نه رویداد، نه مراسم، نه پزشکی."""
     if ts and time.time() - ts > MAX_AGE:
         return False
-    if BAD.search(t) or not (K1.search(t) or official):
+    if BACKFILL and not ts:  # در بازگشت تاریخ، موردِ بی‌زمان یعنی چیزی که سنش را نمی‌دانیم
         return False
-    if not BACKFILL:
-        return bool(K2.search(t))
-    # در بازگشت تاریخ: اعلامِ دارای مهلت، با تاریخِ مشخص و سرصفحه‌ی غیرمراسمی
-    return bool(ts) and bool(CALL.search(t)) and not NOISE.search(t[:160])
+    if BAD.search(t) or MED.search(t) or not FAC.search(t) or not CALL.search(t):
+        return False
+    if IOT.search(t):  # اشاره‌ی صریح به حوزه‌ی ما: مهم‌ترین حالت
+        return True
+    return bool(K1.search(t)) and not FIELD.search(t)  # فراخوان عمومیِ دانش‌بنیان هم به درد ما می‌خورد
 
-def handle(text, link, ts, source, official, silent):
+def handle(text, link, ts, source, silent):
     text = flat(text)
     if not text:
         return 0
@@ -322,7 +376,11 @@ def handle(text, link, ts, source, official, silent):
     # در بازگشتِ تاریخ، فقط آنچه واقعاً ارسال شده تکرار نمی‌شود؛ مواردِ صرفاً ثبت‌شده آزادند
     if was_sent(uid, cid) or silent or (known and not BACKFILL):
         return 0
-    if not passes(t, ts, official) or not llm_ok(text[:160], text):
+    if not passes(t, ts) or not llm_ok(text[:160], text):
+        return 0
+    ws = keywords(t)
+    if near_dup(ws, uid):
+        mark_sent(uid, cid)  # بازنشرِ همان مورد؛ دیگر بررسی نمی‌شود
         return 0
     age = ""
     if BACKFILL and ts:
@@ -330,21 +388,26 @@ def handle(text, link, ts, source, official, silent):
         age = f"\n🗓 {time.strftime('%Y/%m/%d', time.gmtime(ts))} ({str(d).translate(FA_DIGITS)} روز پیش)"
     if send_all(f"🔔 {text[:900]}\n\n📌 {source}" + (f"\n{link}" if link else "") + age):
         mark_sent(uid, cid)
+        note_dup(uid, ws)
         return 1
     return 0
 
-def add(out, text, link, ts, source, official):
+def add(out, text, link, ts, source):
     """عضوِ فهرست collect می‌شود؛ آنچه قبلاً ارسال شده یا فیلتر رد می‌کند، و تکرارِ درون‌فهرستی اضافه نمی‌شود."""
     text = flat(text)
     if not text:
         return
     uid, cid, t = fingerprints(text, link)
-    if was_sent(uid, cid) or not passes(t, ts, official):
+    if was_sent(uid, cid) or not passes(t, ts):
+        return
+    ws = keywords(t)
+    if near_dup(ws, uid):
         return
     for o in out:
         if o[1] == uid or o[2] == cid:
             return
-    out.append((ts or 0, uid, cid, text, link, source, official))
+    note_dup(uid, ws)
+    out.append((ts or 0, uid, cid, text, link, source))
 
 def collect():
     """همه‌ی واجدان‌شرایطِ بازه را از منابع و کانال‌ها جمع می‌کند، بدون هیچ ارسالی."""
@@ -357,7 +420,7 @@ def collect():
         fn = fetch_rss if s["type"] == "rss" else (lambda u: fetch_html(u, s.get("selector")))
         try:
             for text, link, ts in fn(s["url"]):
-                add(out, text, link, ts, s["name"], s.get("official", False))
+                add(out, text, link, ts, s["name"])
         except Exception as e:
             log.warning("%s خطا: %s", s.get("name"), str(e)[:160])
     load_manual()
@@ -367,7 +430,7 @@ def collect():
             meta, items, url = fetch_channel(key, PAGES)
             title = flat((meta or "").split("@")[0].replace("✔", ""))[:60]
             for text, link, ts in items:
-                add(out, text, link or url, ts, f"{key} · {title}", False)
+                add(out, text, link or url, ts, f"{key} · {title}")
             log.info("کانال %d/%d %s: %d واجد شرایط تا اینجا", i, len(keys), key, len(out))
         except Exception as e:
             log.warning("%s خطا: %s", key, str(e)[:160])
@@ -382,11 +445,15 @@ def backfill(limit):
     log.info("بازگشت در تاریخ: %d مورد واجد شرایط | %d تای تازه‌تر ارسال می‌شود | بازه %d روز",
              len(items), min(limit, len(items)), MAX_AGE // 86400)
     n = 0
-    for ts, _, _, text, link, source, official in items[:limit]:
-        n += handle(text, link, ts or None, source, official, False)
+    for ts, _, _, text, link, source in items[:limit]:
+        n += handle(text, link, ts or None, source, False)
     commit()
     log.info("بازگشت در تاریخ پایان یافت: %d مورد ارسال شد", n)
     return n
+
+def topic(t):
+    """موضوع کانال/متن به کار ما می‌خورد: دانش‌بنیان، یا خودِ اینترنت اشیا و هوشمندسازی."""
+    return bool(K1.search(t) or IOT.search(t))
 
 def run_source(s, seed):
     fn = fetch_rss if s["type"] == "rss" else (lambda u: fetch_html(u, s.get("selector")))
@@ -394,19 +461,19 @@ def run_source(s, seed):
     for text, link, ts in fn(s["url"]):
         if link:
             discover(link)
-        n += handle(text, link, ts, s["name"], s.get("official", False), seed)
+        n += handle(text, link, ts, s["name"], seed)
     return n
 
 def run_channel(key, status, seed):
     silent = (seed or status == "new") and not BACKFILL  # اولین بررسی هر کانال: فقط ثبت، بدون ارسال
     meta, items, url = fetch_channel(key, PAGES)
-    any_k1 = bool(K1.search(norm(meta))) or any(K1.search(norm(t)) for t, _, _ in items)
+    any_topic = topic(norm(meta)) or any(topic(norm(t)) for t, _, _ in items)
     title = flat(meta.split("@")[0].replace("✔", ""))[:60]  # نام کانال برای نمایش در پیام
     n = 0
     for text, link, ts in items:
-        n += handle(text, link or url, ts, f"{key} · {title}", False, silent)
+        n += handle(text, link or url, ts, f"{key} · {title}", silent)
     if status == "new":  # کانال بی‌ربط یا غیرقابل‌خواندن کنار گذاشته می‌شود
-        db.execute("UPDATE channels SET status=? WHERE key=?", ("ok" if any_k1 else "no", key))
+        db.execute("UPDATE channels SET status=? WHERE key=?", ("ok" if any_topic else "no", key))
         commit()
     if not items:
         log.info("%s: پست متن‌دار استخراج نشد", key)
