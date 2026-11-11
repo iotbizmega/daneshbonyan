@@ -55,6 +55,11 @@
     "url": "https://www.ilna.ir/rss"
   },
   {
+    "name": "خبرگزاری ایسنا",
+    "type": "rss",
+    "url": "https://www.isna.ir/rss"
+  },
+  {
     "name": "بنیاد ملی علم ایران: حمایت‌های ویژه فراخوانی",
     "type": "html",
     "official": true,
@@ -88,8 +93,38 @@
     "name": "پارک علم و فناوری دانشگاه تهران: اخبار",
     "type": "html",
     "official": true,
-    "selector": ".entry-title",
+    "selector": "a.av-masonry-entry",
     "url": "https://utstpark.ir/news/"
+  },
+  {
+    "name": "پارک علم و فناوری خراسان رضوی: اطلاعیه‌ها و فراخوان‌ها",
+    "type": "html",
+    "official": true,
+    "url": "https://www.kstp.ir/fa/news?category=181"
+  },
+  {
+    "name": "پارک علم و فناوری آذربایجان غربی: اطلاعیه‌ها",
+    "type": "html",
+    "official": true,
+    "url": "https://wastp.ir/announcements/"
+  },
+  {
+    "name": "پارک علم و فناوری لرستان: اخبار و فراخوان‌ها",
+    "type": "html",
+    "official": true,
+    "url": "https://lstp.ir/"
+  },
+  {
+    "name": "پارک علم و فناوری اردبیل: فراخوان‌ها",
+    "type": "html",
+    "official": true,
+    "url": "https://ardstp.ir/news/category/فراخوان-1"
+  },
+  {
+    "name": "پارک علم و فناوری زنجان: فراخوان‌ها",
+    "type": "html",
+    "official": true,
+    "url": "https://www.zstp.ir/calls/"
   },
 
   {
