@@ -40,6 +40,26 @@
     "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=پارک+علم+و+فناوری+فراخوان"
   },
   {
+    "name": "Bing News: اینترنت اشیا فراخوان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اینترنت+اشیا+فراخوان"
+  },
+  {
+    "name": "Bing News: اینترنت اشیا تسهیلات",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اینترنت+اشیا+تسهیلات"
+  },
+  {
+    "name": "Bing News: هوشمندسازی دانش بنیان حمایت",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=هوشمندسازی+دانش+بنیان+حمایت"
+  },
+  {
+    "name": "Bing News: اینترنت اشیا دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اینترنت+اشیا+دانش+بنیان"
+  },
+  {
     "name": "خبرگزاری ایرنا",
     "type": "rss",
     "url": "https://www.irna.ir/rss"
