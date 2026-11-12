@@ -1,4 +1,4 @@
-name: اسکن
+name: اسکن زنده
 
 on:
   schedule:
@@ -9,8 +9,9 @@ permissions:
   contents: write
 
 concurrency:
-  # نامِ تازه عمداً: اجرای گیرافتاده در صفِ گروهِ پیشین («scan») مانع شروع دورهای بعدی می‌شد
-  group: scan-v2
+  # گروهِ تازه: صفِ workflow پیشین با یک اجرای گیرکرده در وضعیت queued قفل شده بود و
+  # هیچ اجرای زمان‌بندی‌شده‌ی تازه‌ای ساخته نمی‌شد؛ فایل تازه = صف و ثبتِ schedule تازه.
+  group: scan-live
   cancel-in-progress: false
 
 jobs:
