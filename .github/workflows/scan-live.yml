@@ -4,9 +4,15 @@ on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
+  # backstop: زمان‌بندیِ schedule از ۲۶ اوت ۲۰۲۶ در خودِ GitHub خراب است (اجرا ساخته نمی‌شود)؛
+  # هر تغییرِ واقعی در منابع/کد، یک دور فوری راه می‌اندازد.
   push:
     branches: [main]
-    paths: [".github/workflows/scan-live.yml"]
+    paths:
+      - ".github/workflows/scan-live.yml"
+      - "agent.py"
+      - "sources.json"
+      - "channels.txt"
 
 permissions:
   contents: write
