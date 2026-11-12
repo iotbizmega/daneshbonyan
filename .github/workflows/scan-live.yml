@@ -58,9 +58,11 @@ jobs:
         if: always()  # حتی وقتی اجرای دور شکست بخورد ضربان ثبت شود تا وضعیتِ زمان‌بندی قابل پیگیری باشد
         env:
           GIT_TOKEN: ${{ secrets.STATE_TOKEN || secrets.GITHUB_TOKEN }}
+          EVENT: ${{ github.event_name }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           set -e
-          date -u '+%Y-%m-%dT%H:%M:%SZ' > /tmp/heartbeat
+          { date -u '+%Y-%m-%dT%H:%M:%SZ'; echo "event=${EVENT} run=${RUN_ID}"; } > /tmp/heartbeat
           if [ -f data/seen.db ]; then cp data/seen.db /tmp/seen.db; fi
           git remote set-url origin "https://x-access-token:${GIT_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git fetch -q --depth 1 origin +refs/heads/state:refs/remotes/origin/state || true
