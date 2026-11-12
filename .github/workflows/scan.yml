@@ -9,7 +9,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: scan
+  # نامِ تازه عمداً: اجرای گیرافتاده در صفِ گروهِ پیشین («scan») مانع شروع دورهای بعدی می‌شد
+  group: scan-v2
   cancel-in-progress: false
 
 jobs:
