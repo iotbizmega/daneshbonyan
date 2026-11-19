@@ -20,11 +20,6 @@
     "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=صندوق+نوآوری+و+شکوفایی"
   },
   {
-    "name": "Bing News: اعتبار ویژه دانش بنیان",
-    "type": "rss",
-    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اعتبار+ویژه+دانش+بنیان"
-  },
-  {
     "name": "Bing News: وام دانش بنیان",
     "type": "rss",
     "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=وام+دانش+بنیان"
@@ -152,5 +147,120 @@
     "type": "html",
     "disabled": true,
     "url": "https://www.isti.ir/Nnews"
+  },
+  {
+    "name": "Bing News: اعتبار مالیاتی دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اعتبار+مالیاتی+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: ضمانت نامه دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=ضمانت+نامه+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: خط اعتباری دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=خط+اعتباری+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: تسهیلات پارک علم و فناوری",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=تسهیلات+پارک+علم+و+فناوری"
+  },
+  {
+    "name": "Bing News: اعطای تسهیلات",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=اعطای+تسهیلات"
+  },
+  {
+    "name": "Bing News: صندوق نوآوری وام",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=صندوق+نوآوری+وام"
+  },
+  {
+    "name": "Bing News: کارگزار صندوق نوآوری",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=کارگزار+صندوق+نوآوری"
+  },
+  {
+    "name": "Bing News: پذیرش طرح صندوق نوآوری",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=پذیرش+طرح+صندوق+نوآوری"
+  },
+  {
+    "name": "Bing News: صندوق ضمانت دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=صندوق+ضمانت+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: توانمندسازی تسهیلات دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=توانمندسازی+تسهیلات+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: بهره مندی تسهیلات دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=بهره+مندی+تسهیلات+دانش+بنیان"
+  },
+  {
+    "name": "Bing News: سرمایه گذاری خطرپذیر",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=سرمایه+گذاری+خطرپذیر"
+  },
+  {
+    "name": "Bing News: حمایت مالی استارتاپ",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=حمایت+مالی+استارتاپ"
+  },
+  {
+    "name": "Bing News: وام قرض الحسنه فناور",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=وام+قرض+الحسنه+فناور"
+  },
+  {
+    "name": "Bing News: گرنت پژوهش",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=گرنت+پژوهش"
+  },
+  {
+    "name": "Bing News: تسهیلات هوشمندسازی",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=تسهیلات+هوشمندسازی"
+  },
+  {
+    "name": "Bing News: وام فناوری اطلاعات",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=وام+فناوری+اطلاعات"
+  },
+  {
+    "name": "Bing News: تسهیلات اینترنت اشیا",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=تسهیلات+اینترنت+اشیا"
+  },
+  {
+    "name": "Bing News: تسهیلات شرکت دانش بنیان",
+    "type": "rss",
+    "url": "https://www.bing.com/news/search?format=rss&setlang=fa&q=تسهیلات+شرکت+دانش+بنیان"
+  },
+  {
+    "name": "تجارت‌نیوز",
+    "type": "rss",
+    "url": "https://tejaratnews.com/rss"
+  },
+  {
+    "name": "اقتصاد آنلاین",
+    "type": "rss",
+    "url": "https://www.eghtesadonline.com/rss"
+  },
+  {
+    "name": "دنیای اقتصاد",
+    "type": "rss",
+    "url": "https://donya-e-eqtesad.com/rss"
+  },
+  {
+    "name": "ایمنا (شهری/هوشمندسازی)",
+    "type": "rss",
+    "url": "https://www.imna.ir/rss"
   }
 ]
